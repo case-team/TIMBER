@@ -17,6 +17,12 @@ class SJBtag_SF {
         BTagCalibration calib;
         BTagCalibrationReader b_reader, c_reader, udsg_reader;
 
+        //names of systematics for different types
+        std::vector<std::string> sys_uncs_norm {"up", "down"};
+        std::vector<std::string> sys_uncs_shape_budsg {"up_jes", "up_lf", "up_hf", "up_hfstats1", "up_hfstats2", "up_lfstats1", "up_lfstats2",
+                                                       "down_jes", "down_lf", "down_hf", "down_hfstats1", "down_hfstats2", "down_lfstats1", "down_lfstats2"};
+        std::vector<std::string> sys_uncs_shape_c {"up_cferr1", "up_cferr2", "down_cferr1", "down_cferr2"};
+
     public:
         /**
          * @brief Construct a new subjet b tag scale factor lookup object

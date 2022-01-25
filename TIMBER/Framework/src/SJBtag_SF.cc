@@ -1,17 +1,24 @@
 #include "../include/SJBtag_SF.h"
 
 SJBtag_SF::SJBtag_SF(int year, std::string tagger, std::string op_string) {
+
+    std::string meas_type = "comb";
+
+    auto sys_uncs = sys_uncs_norm;
+
     if (op_string == "loose") {
         operating_point = BTagEntry::OP_LOOSE;
     } else if (op_string == "medium") {
         operating_point = BTagEntry::OP_MEDIUM;
     } else if (op_string == "tight") {
         operating_point = BTagEntry::OP_TIGHT;
-    } else if( op_string == "reshaping"){
+    } else if( op_string == "shape"){
         operating_point = BTagEntry::OP_RESHAPING;
+        meas_type = "iterativefit";
+        sys_uncs = sys_uncs_shape_budsg;
     }
     else {
-        throw "Operating point type not supported!";
+        throw std::runtime_error("Operating point type not supported!");
     }
 
     
@@ -23,33 +30,37 @@ SJBtag_SF::SJBtag_SF(int year, std::string tagger, std::string op_string) {
         csv_file = std::string(std::getenv("TIMBERPATH"))+"TIMBER/data/OfficialSFs/DeepCSV_102XSF_V1.csv";
     }
 
+
     // setup calibration + reader
+    printf("Loading b SF's \n");
     calib = BTagCalibration(tagger, csv_file);
     b_reader = BTagCalibrationReader(operating_point,  // operating point
                                     "central",             // central sys type
-                                    {"up", "down"});      // other sys types
+                                    sys_uncs);      // other sys types
 
     b_reader.load(calib,                // calibration instance
                   BTagEntry::FLAV_B,    // btag flavour
-                  "comb");               // measurement type
+                  meas_type);               // measurement type
 
     if( operating_point == BTagEntry::OP_RESHAPING){
+    printf("Loading c SF's \n");
         //load other flavor calibrations as well
         c_reader = BTagCalibrationReader(operating_point,  // operating point
                                         "central",             // central sys type
-                                        {"up", "down"});      // other sys types
+                                        sys_uncs_shape_c);      // other sys types
 
         c_reader.load(calib,                // calibration instance
                       BTagEntry::FLAV_C,    // btag flavour
-                      "comb");               // measurement type
+                      meas_type);               // measurement type
 
+        printf("Loading udsg SF's \n");
         udsg_reader = BTagCalibrationReader(operating_point,  // operating point
                                         "central",             // central sys type
-                                        {"up", "down"});      // other sys types
+                                        sys_uncs_shape_budsg);      // other sys types
 
         udsg_reader.load(calib,                // calibration instance
                       BTagEntry::FLAV_UDSG,    // btag flavour
-                      "comb");               // measurement type
+                      meas_type);               // measurement type
     }
 
 }; 
@@ -57,9 +68,17 @@ SJBtag_SF::SJBtag_SF(int year, std::string tagger, std::string op_string) {
 RVec<float> SJBtag_SF::eval(float pt, float eta) {
     RVec<float> jet_scalefactor(3);
 
-    float nom = b_reader.eval_auto_bounds("central", BTagEntry::FLAV_B, eta, pt);
-    float up = b_reader.eval_auto_bounds("up", BTagEntry::FLAV_B, eta, pt);
-    float down = b_reader.eval_auto_bounds("down", BTagEntry::FLAV_B, eta, pt);
+    float nom, up, down;
+    nom = b_reader.eval_auto_bounds("central", BTagEntry::FLAV_B, eta, pt);
+
+    if( operating_point != BTagEntry::OP_RESHAPING){
+        float up = b_reader.eval_auto_bounds("up", BTagEntry::FLAV_B, eta, pt);
+        float down = b_reader.eval_auto_bounds("down", BTagEntry::FLAV_B, eta, pt);
+    }
+    else{ // for now
+        up = nom;
+        down = nom;
+    }
 
     jet_scalefactor[0] = nom;
     jet_scalefactor[1] = up;
