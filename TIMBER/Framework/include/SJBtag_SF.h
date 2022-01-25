@@ -15,7 +15,7 @@ class SJBtag_SF {
         std::string csv_file;
         BTagEntry::OperatingPoint operating_point;
         BTagCalibration calib;
-        BTagCalibrationReader reader;
+        BTagCalibrationReader b_reader, c_reader, udsg_reader;
 
     public:
         /**
@@ -35,5 +35,7 @@ class SJBtag_SF {
          * @return RVec<float> Nominal, up, down scale factor values.
          */
         RVec<float> eval(float pt, float eta);
+        //RVec<float> eval(int sj_idx1, int sj_idx2, ROOT::VecOps::RVec<float> subjet_btag, ROOT::VecOps::RVec<float> subjet_pt,
+        //                    ROOT::VecOps::RVec<float> subjet_eta, ROOT::VecOps::RVec<BTagEntry::JetFlavor> subjet_flavour);
 };
 #endif
