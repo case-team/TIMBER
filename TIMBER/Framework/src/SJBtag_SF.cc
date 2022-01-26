@@ -65,6 +65,7 @@ SJBtag_SF::SJBtag_SF(int year, std::string tagger, std::string op_string) {
 
 }; 
 
+/*
 RVec<float> SJBtag_SF::eval(float pt, float eta) {
     RVec<float> jet_scalefactor(3);
 
@@ -86,40 +87,89 @@ RVec<float> SJBtag_SF::eval(float pt, float eta) {
 
     return jet_scalefactor;
 };
+*/
 
 
 
-/*
 RVec<float> SJBtag_SF::eval(
-    int sj_idx1, 
-    int sj_idx2, 
+        unsigned int fatjet_idx,
+        unsigned int nFatJets,
+    ROOT::VecOps::RVec<unsigned int> sj_idx1_col,
+    ROOT::VecOps::RVec<unsigned int> sj_idx2_col,
     ROOT::VecOps::RVec<float> subjet_btag,
     ROOT::VecOps::RVec<float> subjet_pt,
     ROOT::VecOps::RVec<float> subjet_eta,
-    ROOT::VecOps::RVec<BTagEntry::JetFlavor> subjet_flavour) {
+    ROOT::VecOps::RVec<int> subjet_flavour) {
+
+    RVec<float> jet_scalefactor(3, 1.);
 
 
-    unsigned int sj_idx = -1;
+    //return if this fatjet doesn't exist
+    if(fatjet_idx >= nFatJets) return jet_scalefactor;
 
+
+    //else look up subjets idxs of this fatjet
+    
+    int sj_idx1 = sj_idx1_col[fatjet_idx];
+    int sj_idx2 = sj_idx2_col[fatjet_idx];
+
+
+    //no subjets
+    if(sj_idx1 < 0) return jet_scalefactor;
+
+
+    int sj_idx = -1;
+
+    //want subjet with higher btag score
     if(sj_idx2 < 0 || (subjet_btag[sj_idx1] > subjet_btag[sj_idx2])) sj_idx  = sj_idx1;
     else    sj_idx = sj_idx2;
 
-    BTagCalibrationReader reader;
-    if(subjet_flavour[sj_idx] == BTagEntry::FLAV_B) reader = b_reader;
-    else if(subjet_flavour[sj_idx] == BTagEntry::FLAV_C) reader = c_reader;
-    else if(subjet_flavour[sj_idx] == BTagEntry::FLAV_UDSG) reader = udsg_reader;
-    else throw "Unknown hadron flavor";
-        
-    RVec<float> jet_scalefactor(3);
 
-    float nom = reader.eval_auto_bounds("central", subjet_flavour[sj_idx], subjet_eta[sj_idx], subjet_pt[sj_idx]);
-    float up = reader.eval_auto_bounds("up", subjet_flavour[sj_idx], subjet_eta[sj_idx], subjet_pt[sj_idx]);
-    float down = reader.eval_auto_bounds("down", subjet_flavour[sj_idx], subjet_eta[sj_idx], subjet_pt[sj_idx]);
+    //work around b/c it doesn't like casting...
+    const int b_flav = 5;
+    const int c_flav = 4;
+    BTagEntry::JetFlavor flav;
+    
+    
+    BTagCalibrationReader reader;
+    std::vector<std::string> sys_list;
+    if(subjet_flavour[sj_idx] == b_flav){
+        reader = b_reader;
+        flav = BTagEntry::FLAV_B;
+        sys_list = sys_uncs_shape_budsg;
+    }
+    else if(subjet_flavour[sj_idx] == c_flav){
+        reader = c_reader;
+        flav = BTagEntry::FLAV_C;
+        sys_list = sys_uncs_shape_c;
+    }
+    else{
+        reader = udsg_reader;
+        flav = BTagEntry::FLAV_UDSG;
+        sys_list = sys_uncs_shape_budsg;
+    }
+        
+
+    float nom = reader.eval_auto_bounds("central", flav, std::fabs(subjet_eta[sj_idx]), subjet_pt[sj_idx], subjet_btag[sj_idx]);
+    float up(0.), down(0.);
+
+    
+    //envelop of all systematics (simplest procedure possible for now...)
+    for (std::string & sys: sys_list){
+        float diff = reader.eval_auto_bounds(sys, flav, std::fabs(subjet_eta[sj_idx]), subjet_pt[sj_idx], subjet_btag[sj_idx]) - nom;
+
+        if(diff > 0) up += diff * diff;
+        else down += diff * diff;
+    }
+    up = nom + std::pow(up, 0.5);
+    down = nom - std::pow(down, 0.5);
+
+
 
     jet_scalefactor[0] = nom;
     jet_scalefactor[1] = up;
     jet_scalefactor[2] = down;
+    
 
     return jet_scalefactor;
 };
-*/

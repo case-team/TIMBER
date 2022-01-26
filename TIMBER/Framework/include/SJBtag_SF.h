@@ -40,8 +40,8 @@ class SJBtag_SF {
          * @param eta \f$\eta\f$ of subjet
          * @return RVec<float> Nominal, up, down scale factor values.
          */
-        RVec<float> eval(float pt, float eta);
-        //RVec<float> eval(int sj_idx1, int sj_idx2, ROOT::VecOps::RVec<float> subjet_btag, ROOT::VecOps::RVec<float> subjet_pt,
-        //                    ROOT::VecOps::RVec<float> subjet_eta, ROOT::VecOps::RVec<BTagEntry::JetFlavor> subjet_flavour);
+        //RVec<float> eval(float pt, float eta);
+        RVec<float> eval( unsigned int fatjet_idx, unsigned int nFatJets, ROOT::VecOps::RVec<unsigned int> sj_idx1_col, ROOT::VecOps::RVec<unsigned int> sj_idx2_col,
+                ROOT::VecOps::RVec<float> subjet_btag, ROOT::VecOps::RVec<float> subjet_pt, ROOT::VecOps::RVec<float> subjet_eta, ROOT::VecOps::RVec<int> subjet_flavour);
 };
 #endif
