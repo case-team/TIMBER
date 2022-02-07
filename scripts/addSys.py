@@ -10,7 +10,7 @@ sys.path.append('../')
 
 
 #input_file = "GravToZZ_M2500_PFNano.root"
-input_file = "XToHY_MX_2000_MY_150_UL17_test.root"
+input_file = "XToHY_MX_2600_MY_200_UL17_test.root"
 
 def JMEvariationStr(variation):
     base_calibs = ['FatJet_JES_nom','FatJet_JER_nom', 'FatJet_JMS_nom', 'FatJet_JMR_nom']
@@ -65,7 +65,7 @@ if(pancakes): #based on older version of nanoAOD, this info isn't saved, just us
     hadron_flavor = 'Jet_hadronFlavour'
 a.AddCorrection(lead_sjbt_corr, evalArgs={'fatjet_idx': 'DijetIdx1', 'nFatJets' : 'nFatJet', 'sj_idx1_col': 'FatJet_subJetIdx1', 'sj_idx2_col' : 'FatJet_subJetIdx2', 
                                     'subjet_btag' : 'SubJet_btagDeepB', 'subjet_pt': 'SubJet_pt', 'subjet_eta': 'SubJet_eta', 'subjet_flavour' : hadron_flavor})
-a.AddCorrection(sublead_sjbt_corr, evalArgs={'fatjet_idx': DijetIdx2, 'nFatJets' : 'nFatJet', 'sj_idx1_col': 'FatJet_subJetIdx1', 'sj_idx2_col' : 'FatJet_subJetIdx2', 
+a.AddCorrection(sublead_sjbt_corr, evalArgs={'fatjet_idx': 'DijetIdx2', 'nFatJets' : 'nFatJet', 'sj_idx1_col': 'FatJet_subJetIdx1', 'sj_idx2_col' : 'FatJet_subJetIdx2', 
                                      'subjet_btag' : 'SubJet_btagDeepB', 'subjet_pt': 'SubJet_pt', 'subjet_eta': 'SubJet_eta', 'subjet_flavour' : hadron_flavor})
 columns_to_save.extend(['lead_sjbtag_corr__nom', 'lead_sjbtag_corr__up',  'lead_sjbtag_corr__down',
                         'sublead_sjbtag_corr__nom', 'sublead_sjbtag_corr__up',  'sublead_sjbtag_corr__down'])
@@ -126,7 +126,7 @@ for var in variations:
     columns_to_save.extend(['FatJet1_pt_'+ var, 'FatJet1_msoftdrop_'+ var, 'FatJet2_pt_'+ var, 'FatJet2_msoftdrop_'+ var ])
         
 
-a.Define("Foo", "myPrint(FatJet_JES_nom, FatJet_JER_up, FatJet_JES_up, FatJet_JER_up, FatJet_JES_down, FatJet_JER_down, FatJet_pt, FatJet_pt_corr)")
+#a.Define("Foo", "myPrint(FatJet_JES_nom, FatJet_JER_up, FatJet_JES_up, FatJet_JER_up, FatJet_JES_down, FatJet_JER_down, FatJet_pt, FatJet_pt_corr)")
 
 
 

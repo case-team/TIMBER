@@ -68,7 +68,6 @@ std::vector<float> JetSmearer::GetSmearValsPt(LorentzV jet, RVec<LorentzV> genJe
             
             jet_sf = _jerSF.getScaleFactor(_paramsSF, variation);
             
-            std::cout << "gen_pt " << genJet.Pt() << " jet_sf " << jet_sf << std::endl;
 
             if (genJet.Pt() > -1) { // Case 1: we have a "good" gen jet matched to the reco jet
                 dPt = jet.Pt() - genJet.Pt();
@@ -89,7 +88,6 @@ std::vector<float> JetSmearer::GetSmearValsPt(LorentzV jet, RVec<LorentzV> genJe
             out[i] = smearFactor;
         }
     }
-    std::cout << "Smear : " << out[0] << " " << out[1] << " " << out [2] << " "  << std::endl;
     return out;
 }
 
