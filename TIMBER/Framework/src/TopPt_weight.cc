@@ -27,8 +27,13 @@ std::vector<float> TopPt_weight::matchingGenPt(
 }
 
 RVec<float> TopPt_weight::eval(
-        RVec<int> GenPart_pdgId, RVec<int> GenPart_statusFlags, RVec<ROOT::Math::PtEtaPhiMVector> GenPart_vect,
-        ROOT::Math::PtEtaPhiMVector jet0, ROOT::Math::PtEtaPhiMVector jet1, float scale){
+        RVec<int> GenPart_pdgId, RVec<int> GenPart_statusFlags, RVec<ROOT::Math::PtEtaPhiMVector> GenPart_vect, RVec<ROOT::Math::PtEtaPhiMVector> FatJet_vect,
+        int jet0_idx, int jet1_idx, float scale){
+
+    if(jet0_idx <0 || jet1_idx < 0) return {1.0, 1.0, 1.0};
+
+    auto jet0 = FatJet_vect[jet0_idx];
+    auto jet1 = FatJet_vect[jet1_idx];
 
     std::vector<float> matched = matchingGenPt(GenPart_pdgId, GenPart_statusFlags,
                                           GenPart_vect, jet0, jet1);

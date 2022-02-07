@@ -49,7 +49,7 @@ class TopPt_weight {
          * @return RVec<float> {nom, up, down} variations of the top \f$p_T\f$ reweighting value (absolute).
          */
         RVec<float> eval(
-                RVec<int> GenPart_pdgId, RVec<int> GenPart_statusFlags, RVec<ROOT::Math::PtEtaPhiMVector> GenPart_vect,
-                ROOT::Math::PtEtaPhiMVector jet0, ROOT::Math::PtEtaPhiMVector jet1, float scale = 0.5);
+                RVec<int> GenPart_pdgId, RVec<int> GenPart_statusFlags, RVec<ROOT::Math::PtEtaPhiMVector> GenPart_vect, RVec<ROOT::Math::PtEtaPhiMVector> FatJet_vect,
+                int jet0_idx, int jet1, float scale);
 };
 #endif
