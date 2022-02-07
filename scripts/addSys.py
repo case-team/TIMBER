@@ -106,7 +106,7 @@ a.Define('FatJet_msoftdrop_corr', 'hardware::MultiHadamardProduct(FatJet_msoftdr
 #save as individual columns b/c issues reading vectors...
 var = "corr"
 a.Define('FatJet1_pt_corr', '(DijetIdx1 >= 0) ? FatJet_pt_%s [DijetIdx1] : 1' % var) 
-a.Define('FatJet1_msoftdrop_corr'+ var, '(DijetIdx1 >= 0) ? FatJet_msoftdrop_%s [DijetIdx1] : 1' % var) 
+a.Define('FatJet1_msoftdrop_corr', '(DijetIdx1 >= 0) ? FatJet_msoftdrop_%s [DijetIdx1] : 1' % var) 
 a.Define('FatJet2_pt_corr', '(DijetIdx2 >= 0) ? FatJet_pt_%s [DijetIdx2] : 1' % var) 
 a.Define('FatJet2_msoftdrop_corr', '(DijetIdx2 >= 0) ? FatJet_msoftdrop_%s [DijetIdx2] : 1' % var) 
 
@@ -131,6 +131,7 @@ for var in variations:
 
 
 a = p.AutoPU(a, era)
+#a.Range(10)
 
 
 
