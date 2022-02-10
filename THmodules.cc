@@ -18,7 +18,7 @@ RVec<int> PickDijets(RVec<float> pt, RVec<float> eta, RVec<float> phi, RVec<floa
     }
 
     //mass order
-    if(jet0Idx > 0 && jet1Idx > 0){
+    if(jet0Idx >= 0 && jet1Idx >= 0){
         if(mass[jet1Idx] > mass[jet0Idx]){
             int temp = jet1Idx;
             jet1Idx = jet0Idx;
