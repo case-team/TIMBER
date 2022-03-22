@@ -2,15 +2,27 @@ from TIMBER.Analyzer import *
 from TIMBER.Tools import AutoJME as JM
 from TIMBER.Tools import AutoPU as p
 from TIMBER.Tools.Common import CompileCpp
+import argparse
 import ROOT,sys
 
 sys.path.append('../../')
 sys.path.append('../')
 #input_file = 'some_nano_files.txt' # or 'file.root'
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", "--inputFile", default = "in.root", help = "Input file name")
+parser.add_argument("-o", "--outputFile", default = "out.root", help = "Output file name")
+parser.add_argument("-y", "--year", type = int, default = 17, help = "Year of sample (16,17,18)")
+parser.add_argument("--ttbar", default = False, action = 'store_true', help = "TTbar sample (add top pt reweighting)")
+
+options = parser.parse_args()
+
+
 
 #input_file = "GravToZZ_M2500_PFNano.root"
-input_file = "XToHY_MX_2600_MY_200_UL17_test.root"
+#input_file = "XToHY_MX_2600_MY_200_UL17_test.root"
+#input_file = "WpToBpT_Wp3000_Bp400_UL17.root"
+#input_file = "TTBar_PFNano_UL18.root"
 
 def JMEvariationStr(variation):
     base_calibs = ['FatJet_JES_nom','FatJet_JER_nom', 'FatJet_JMS_nom', 'FatJet_JMR_nom']
@@ -28,24 +40,20 @@ def JMEvariationStr(variation):
     return pt_calib_vect, mass_calib_vect
 
 
-do_ttbar = False
 
-pancakes = True
+pancakes = False
 
-year = 17
-era = '20' + str(year) #+ 'UL'
+era = '20' + str(options.year)
 columns_to_save = []
 
-a = analyzer(input_file)
+a = analyzer(options.inputFile)
 
 CompileCpp('../THmodules.cc')
 
 a.AddCorrection( Correction('Pdfweight','TIMBER/Framework/include/PDFweight_uncert.h',[a.lhaid],corrtype='uncert'))
-if year == 16 or year == 17:
-    a.AddCorrection( Correction("Prefire","TIMBER/Framework/include/Prefire_weight.h",[year],corrtype='weight'))
+if options.year == 16 or options.year == 17:
+    a.AddCorrection( Correction("Prefire","TIMBER/Framework/include/Prefire_weight.h",[options.year],corrtype='weight'))
     columns_to_save.extend(['Prefire__nom','Prefire__up','Prefire__down'])
-elif year == 18:
-    a.AddCorrection( Correction('HEM_drop','TIMBER/Framework/include/HEM_drop.h',[setname],corrtype='corr'))
 
 
 a.Define('FatJet_vect','hardware::TLvector(FatJet_pt, FatJet_eta, FatJet_phi, FatJet_msoftdrop)')
@@ -57,12 +65,14 @@ columns_to_save.extend(["DijetIdx1", "DijetIdx2"])
 
 
 # Add btagging correction
-lead_sjbt_corr = Correction('lead_sjbtag_corr', 'TIMBER/Framework/include/SJBtag_SF.h', [year,"DeepCSV","shape"], corrtype='weight')
+lead_sjbt_corr = Correction('lead_sjbtag_corr', 'TIMBER/Framework/include/SJBtag_SF.h', [options.year,"DeepCSV","shape"], corrtype='weight')
 sublead_sjbt_corr = lead_sjbt_corr.Clone('sublead_sjbtag_corr')
 
 hadron_flavor = 'SubJet_hadronFlavour'
-if(pancakes): #based on older version of nanoAOD, this info isn't saved, just use jet one for now (definitely wrong)
-    hadron_flavor = 'Jet_hadronFlavour'
+
+#if(pancakes): #based on older version of nanoAOD, this info isn't saved, just use jet one for now (definitely wrong)
+    #hadron_flavor = 'Jet_hadronFlavour'
+
 a.AddCorrection(lead_sjbt_corr, evalArgs={'fatjet_idx': 'DijetIdx1', 'nFatJets' : 'nFatJet', 'sj_idx1_col': 'FatJet_subJetIdx1', 'sj_idx2_col' : 'FatJet_subJetIdx2', 
                                     'subjet_btag' : 'SubJet_btagDeepB', 'subjet_pt': 'SubJet_pt', 'subjet_eta': 'SubJet_eta', 'subjet_flavour' : hadron_flavor})
 a.AddCorrection(sublead_sjbt_corr, evalArgs={'fatjet_idx': 'DijetIdx2', 'nFatJets' : 'nFatJet', 'sj_idx1_col': 'FatJet_subJetIdx1', 'sj_idx2_col' : 'FatJet_subJetIdx2', 
@@ -73,10 +83,8 @@ columns_to_save.extend(['lead_sjbtag_corr__nom', 'lead_sjbtag_corr__up',  'lead_
 
 
 
-if do_ttbar:
+if options.ttbar:
 
-    a.Cut("numFatJets", 'nFatJet > 1')
-    a.SubCollection('Dijet','FatJet','DijetIdxs',useTake=True)
     a.Define('GenParticle_vect','hardware::TLvector(GenPart_pt, GenPart_eta, GenPart_phi, GenPart_mass)')
     a.AddCorrection(
         Correction('TptReweight','TIMBER/Framework/include/TopPt_weight.h',corrtype='weight'),
@@ -151,4 +159,4 @@ for c in a.GetCollectionNames():
 
 columns_to_save.extend(['Pileup__nom','Pileup__up','Pileup__down','Pdfweight__nom','Pdfweight__up','Pdfweight__down'])
 
-a.Snapshot(columns_to_save, 'outfile.root', 'Events', openOption = 'RECREATE')
+a.Snapshot(columns_to_save, options.outputFile, 'Events', openOption = 'RECREATE')

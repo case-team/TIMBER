@@ -6,8 +6,10 @@ using namespace ROOT::VecOps;
 RVec<int> PickDijets(RVec<float> pt, RVec<float> eta, RVec<float> phi, RVec<float> mass, RVec<int> jetId) {
     int jet0Idx = -1;
     int jet1Idx = -1;
+    //lower pt cut so still have jets for JES variations
+    float pt_cut = 50;
     for (int ijet = 0; ijet < pt.size(); ijet++) {
-            if (pt[ijet] > 300 && std::abs(eta[ijet]) < 2.5 && (jetId[ijet] & 2) == 2) {
+            if (pt[ijet] > pt_cut && std::abs(eta[ijet]) < 2.5 && (jetId[ijet] & 2) == 2) {
                 if (jet0Idx == -1 || pt[ijet] > pt[jet0Idx]) {
                     jet1Idx = jet0Idx;
                     jet0Idx = ijet;

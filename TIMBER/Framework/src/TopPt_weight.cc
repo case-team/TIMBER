@@ -37,8 +37,10 @@ RVec<float> TopPt_weight::eval(
 
     std::vector<float> matched = matchingGenPt(GenPart_pdgId, GenPart_statusFlags,
                                           GenPart_vect, jet0, jet1);
-    float genTPt = matched[0];
-    float genTbarPt = matched[1];
+    //https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting
+    //Max correction at 500 GeV
+    float genTPt = std::min(matched[0], 500.f);
+    float genTbarPt = std::min(matched[1], 500.f);
 
     float wTPt = 1.0;
     float wTPt_up = 1.0;
