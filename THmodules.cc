@@ -1,3 +1,5 @@
+#ifndef THMODULES
+#define THMODULES
 #include "ROOT/RVec.hxx"
 #include "TIMBER/Framework/include/common.h"
 
@@ -116,3 +118,4 @@ std::vector<int> PickTopGenMatch(RVec<ROOT::Math::PtEtaPhiMVector> Dijet_vect,
     }
     return {tIdx,hIdx};
 }
+#endif
